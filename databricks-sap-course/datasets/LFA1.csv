@@ -1,0 +1,201 @@
+LIFNR,NAME1,LAND1,ORT01,PSTLZ,STRAS,KTOKK,BRSCH
+0000000001,Vendor 1 Ltda,CO,Miami,91090,Avenida 96 No 53,0002,C
+0000000002,Vendor 2 Ltda,MX,Sao Paulo,94227,Avenida 36 No 93,0001,D
+0000000003,Vendor 3 Ltda,BR,Bogota,16508,Avenida 64 No 62,0001,A
+0000000004,Vendor 4 Ltda,BR,Mexico City,17736,Avenida 11 No 66,0001,B
+0000000005,Vendor 5 Ltda,US,Sao Paulo,99904,Avenida 39 No 87,0002,D
+0000000006,Vendor 6 Ltda,MX,Miami,85700,Avenida 9 No 23,0001,D
+0000000007,Vendor 7 Ltda,CO,Miami,69567,Avenida 24 No 59,0002,D
+0000000008,Vendor 8 Ltda,BR,Mexico City,78194,Avenida 100 No 36,0001,B
+0000000009,Vendor 9 Ltda,US,Bogota,54298,Avenida 49 No 14,0001,B
+0000000010,Vendor 10 Ltda,US,Sao Paulo,80055,Avenida 40 No 52,0001,D
+0000000011,Vendor 11 Ltda,CO,New York,15349,Avenida 35 No 89,0002,D
+0000000012,Vendor 12 Ltda,MX,New York,22485,Avenida 75 No 69,LIEF,A
+0000000013,Vendor 13 Ltda,DE,Bogota,57416,Avenida 50 No 40,0001,B
+0000000014,Vendor 14 Ltda,CO,Bogota,86963,Avenida 24 No 14,0001,B
+0000000015,Vendor 15 Ltda,CO,Miami,24382,Avenida 99 No 79,LIEF,A
+0000000016,Vendor 16 Ltda,BR,Mexico City,68064,Avenida 33 No 49,LIEF,A
+0000000017,Vendor 17 Ltda,US,Miami,10088,Avenida 61 No 82,0002,D
+0000000018,Vendor 18 Ltda,CO,Bogota,38753,Avenida 66 No 85,LIEF,A
+0000000019,Vendor 19 Ltda,MX,New York,17708,Avenida 53 No 19,0002,D
+0000000020,Vendor 20 Ltda,MX,Miami,20252,Avenida 57 No 36,LIEF,C
+0000000021,Vendor 21 Ltda,MX,Sao Paulo,64070,Avenida 66 No 11,0002,C
+0000000022,Vendor 22 Ltda,BR,Mexico City,91283,Avenida 53 No 21,0002,D
+0000000023,Vendor 23 Ltda,BR,New York,59580,Avenida 25 No 95,0001,C
+0000000024,Vendor 24 Ltda,DE,Mexico City,99821,Avenida 50 No 93,0001,A
+0000000025,Vendor 25 Ltda,US,Medellin,13721,Avenida 46 No 28,LIEF,A
+0000000026,Vendor 26 Ltda,BR,Sao Paulo,84072,Avenida 5 No 65,0002,D
+0000000027,Vendor 27 Ltda,DE,Sao Paulo,21947,Avenida 97 No 39,LIEF,A
+0000000028,Vendor 28 Ltda,CO,Miami,38225,Avenida 4 No 19,LIEF,C
+0000000029,Vendor 29 Ltda,DE,New York,80007,Avenida 98 No 59,0002,C
+0000000030,Vendor 30 Ltda,BR,Bogota,21106,Avenida 30 No 21,LIEF,B
+0000000031,Vendor 31 Ltda,US,Medellin,65905,Avenida 16 No 53,0002,A
+0000000032,Vendor 32 Ltda,CO,Mexico City,92185,Avenida 96 No 9,0001,D
+0000000033,Vendor 33 Ltda,BR,New York,54422,Avenida 66 No 4,0001,A
+0000000034,Vendor 34 Ltda,DE,Miami,36392,Avenida 35 No 23,LIEF,A
+0000000035,Vendor 35 Ltda,US,Miami,11542,Avenida 53 No 75,0002,A
+0000000036,Vendor 36 Ltda,US,Bogota,89808,Avenida 89 No 15,0001,D
+0000000037,Vendor 37 Ltda,BR,Miami,39228,Avenida 14 No 15,0001,B
+0000000038,Vendor 38 Ltda,CO,New York,11916,Avenida 3 No 22,0002,D
+0000000039,Vendor 39 Ltda,DE,Miami,36337,Avenida 41 No 89,0002,A
+0000000040,Vendor 40 Ltda,CO,New York,98305,Avenida 58 No 56,LIEF,B
+0000000041,Vendor 41 Ltda,CO,New York,86301,Avenida 61 No 53,0001,B
+0000000042,Vendor 42 Ltda,DE,Mexico City,97005,Avenida 74 No 8,LIEF,D
+0000000043,Vendor 43 Ltda,CO,Bogota,75419,Avenida 100 No 39,0001,A
+0000000044,Vendor 44 Ltda,BR,Medellin,86604,Avenida 69 No 12,0002,C
+0000000045,Vendor 45 Ltda,CO,Bogota,51689,Avenida 75 No 49,0001,C
+0000000046,Vendor 46 Ltda,MX,New York,49501,Avenida 75 No 4,LIEF,D
+0000000047,Vendor 47 Ltda,DE,Bogota,19333,Avenida 41 No 65,LIEF,C
+0000000048,Vendor 48 Ltda,DE,Bogota,23746,Avenida 33 No 7,LIEF,A
+0000000049,Vendor 49 Ltda,DE,Miami,18943,Avenida 18 No 86,0002,A
+0000000050,Vendor 50 Ltda,US,Mexico City,53541,Avenida 39 No 43,0001,C
+0000000051,Vendor 51 Ltda,DE,Bogota,97590,Avenida 72 No 8,0001,C
+0000000052,Vendor 52 Ltda,MX,New York,51042,Avenida 44 No 82,0001,C
+0000000053,Vendor 53 Ltda,DE,Bogota,93311,Avenida 26 No 33,0002,C
+0000000054,Vendor 54 Ltda,BR,Mexico City,59321,Avenida 36 No 52,0001,D
+0000000055,Vendor 55 Ltda,BR,Medellin,27878,Avenida 64 No 37,0002,A
+0000000056,Vendor 56 Ltda,BR,Mexico City,61294,Avenida 31 No 6,0002,B
+0000000057,Vendor 57 Ltda,CO,Sao Paulo,35478,Avenida 15 No 11,0002,A
+0000000058,Vendor 58 Ltda,US,New York,41992,Avenida 31 No 15,0002,B
+0000000059,Vendor 59 Ltda,DE,New York,38460,Avenida 51 No 81,0002,B
+0000000060,Vendor 60 Ltda,DE,Sao Paulo,52117,Avenida 11 No 41,0001,A
+0000000061,Vendor 61 Ltda,BR,Medellin,35400,Avenida 93 No 61,0002,B
+0000000062,Vendor 62 Ltda,CO,Miami,11185,Avenida 74 No 26,LIEF,B
+0000000063,Vendor 63 Ltda,US,Miami,20729,Avenida 81 No 29,LIEF,C
+0000000064,Vendor 64 Ltda,CO,Medellin,83524,Avenida 28 No 98,0002,C
+0000000065,Vendor 65 Ltda,US,Sao Paulo,96435,Avenida 9 No 12,0002,A
+0000000066,Vendor 66 Ltda,DE,New York,70221,Avenida 42 No 63,0002,D
+0000000067,Vendor 67 Ltda,BR,Sao Paulo,50416,Avenida 50 No 22,LIEF,A
+0000000068,Vendor 68 Ltda,BR,Bogota,94772,Avenida 76 No 6,0001,A
+0000000069,Vendor 69 Ltda,CO,Miami,87386,Avenida 46 No 70,0002,A
+0000000070,Vendor 70 Ltda,DE,Bogota,24262,Avenida 42 No 86,0001,B
+0000000071,Vendor 71 Ltda,US,Mexico City,60477,Avenida 83 No 85,LIEF,A
+0000000072,Vendor 72 Ltda,US,Sao Paulo,81854,Avenida 35 No 58,LIEF,A
+0000000073,Vendor 73 Ltda,CO,Sao Paulo,70271,Avenida 23 No 86,LIEF,C
+0000000074,Vendor 74 Ltda,MX,Mexico City,19342,Avenida 23 No 81,0002,D
+0000000075,Vendor 75 Ltda,BR,Medellin,79232,Avenida 1 No 57,LIEF,B
+0000000076,Vendor 76 Ltda,CO,Bogota,88571,Avenida 7 No 9,0002,C
+0000000077,Vendor 77 Ltda,BR,Mexico City,82192,Avenida 5 No 63,LIEF,D
+0000000078,Vendor 78 Ltda,DE,Sao Paulo,33167,Avenida 81 No 47,0002,B
+0000000079,Vendor 79 Ltda,DE,New York,62052,Avenida 12 No 11,0002,C
+0000000080,Vendor 80 Ltda,BR,New York,77032,Avenida 6 No 40,0001,C
+0000000081,Vendor 81 Ltda,BR,Medellin,47464,Avenida 100 No 82,0002,D
+0000000082,Vendor 82 Ltda,MX,New York,22533,Avenida 77 No 51,LIEF,C
+0000000083,Vendor 83 Ltda,MX,Medellin,71818,Avenida 41 No 63,0001,C
+0000000084,Vendor 84 Ltda,US,Mexico City,59695,Avenida 9 No 6,LIEF,C
+0000000085,Vendor 85 Ltda,DE,Medellin,99362,Avenida 31 No 1,0002,B
+0000000086,Vendor 86 Ltda,DE,Miami,21571,Avenida 85 No 90,LIEF,B
+0000000087,Vendor 87 Ltda,BR,Bogota,72800,Avenida 46 No 80,LIEF,B
+0000000088,Vendor 88 Ltda,BR,Bogota,19840,Avenida 39 No 58,LIEF,B
+0000000089,Vendor 89 Ltda,MX,Sao Paulo,30624,Avenida 90 No 27,0002,D
+0000000090,Vendor 90 Ltda,MX,New York,96603,Avenida 75 No 40,0001,B
+0000000091,Vendor 91 Ltda,US,Medellin,60265,Avenida 9 No 84,LIEF,D
+0000000092,Vendor 92 Ltda,DE,Miami,59429,Avenida 97 No 82,0001,C
+0000000093,Vendor 93 Ltda,CO,Miami,45960,Avenida 37 No 56,0002,C
+0000000094,Vendor 94 Ltda,MX,Sao Paulo,35807,Avenida 82 No 59,0001,D
+0000000095,Vendor 95 Ltda,MX,Medellin,27754,Avenida 15 No 69,0002,A
+0000000096,Vendor 96 Ltda,DE,Medellin,34263,Avenida 3 No 49,0002,D
+0000000097,Vendor 97 Ltda,BR,Bogota,94018,Avenida 21 No 64,0001,D
+0000000098,Vendor 98 Ltda,BR,Bogota,44118,Avenida 78 No 78,LIEF,A
+0000000099,Vendor 99 Ltda,US,Miami,21671,Avenida 62 No 78,LIEF,A
+0000000100,Vendor 100 Ltda,DE,Miami,41714,Avenida 86 No 82,LIEF,A
+0000000101,Vendor 101 Ltda,BR,New York,73715,Avenida 91 No 82,0002,D
+0000000102,Vendor 102 Ltda,US,Mexico City,15389,Avenida 53 No 22,0001,D
+0000000103,Vendor 103 Ltda,CO,Mexico City,18520,Avenida 6 No 17,0001,A
+0000000104,Vendor 104 Ltda,MX,New York,51926,Avenida 81 No 87,0001,C
+0000000105,Vendor 105 Ltda,CO,New York,46123,Avenida 78 No 78,0001,B
+0000000106,Vendor 106 Ltda,DE,Miami,98690,Avenida 17 No 11,0002,A
+0000000107,Vendor 107 Ltda,MX,Sao Paulo,76509,Avenida 39 No 85,0001,C
+0000000108,Vendor 108 Ltda,US,Bogota,98547,Avenida 59 No 35,0002,A
+0000000109,Vendor 109 Ltda,MX,Miami,96020,Avenida 3 No 66,LIEF,C
+0000000110,Vendor 110 Ltda,BR,Sao Paulo,19902,Avenida 57 No 45,0001,C
+0000000111,Vendor 111 Ltda,BR,Sao Paulo,80506,Avenida 36 No 59,0002,A
+0000000112,Vendor 112 Ltda,MX,Medellin,27143,Avenida 2 No 18,0001,B
+0000000113,Vendor 113 Ltda,DE,Miami,98902,Avenida 8 No 62,LIEF,C
+0000000114,Vendor 114 Ltda,BR,Bogota,63326,Avenida 22 No 53,0002,D
+0000000115,Vendor 115 Ltda,BR,Bogota,30295,Avenida 22 No 77,0001,D
+0000000116,Vendor 116 Ltda,CO,Bogota,34286,Avenida 67 No 45,0002,B
+0000000117,Vendor 117 Ltda,US,Medellin,39858,Avenida 66 No 44,0001,D
+0000000118,Vendor 118 Ltda,CO,Bogota,85691,Avenida 1 No 32,0001,B
+0000000119,Vendor 119 Ltda,BR,Bogota,68349,Avenida 50 No 55,0002,C
+0000000120,Vendor 120 Ltda,CO,Mexico City,37506,Avenida 39 No 18,0001,A
+0000000121,Vendor 121 Ltda,DE,Mexico City,78445,Avenida 16 No 15,LIEF,C
+0000000122,Vendor 122 Ltda,MX,Sao Paulo,45577,Avenida 66 No 70,0001,D
+0000000123,Vendor 123 Ltda,US,New York,60738,Avenida 9 No 24,LIEF,D
+0000000124,Vendor 124 Ltda,CO,Medellin,62967,Avenida 25 No 74,LIEF,B
+0000000125,Vendor 125 Ltda,US,Sao Paulo,17681,Avenida 34 No 92,LIEF,B
+0000000126,Vendor 126 Ltda,BR,Mexico City,68384,Avenida 60 No 55,0001,C
+0000000127,Vendor 127 Ltda,BR,Medellin,67217,Avenida 20 No 53,0001,C
+0000000128,Vendor 128 Ltda,BR,Bogota,45742,Avenida 16 No 72,LIEF,B
+0000000129,Vendor 129 Ltda,US,Sao Paulo,18558,Avenida 81 No 96,0001,A
+0000000130,Vendor 130 Ltda,DE,New York,63530,Avenida 92 No 22,LIEF,B
+0000000131,Vendor 131 Ltda,DE,New York,50751,Avenida 20 No 43,0001,D
+0000000132,Vendor 132 Ltda,BR,Medellin,89102,Avenida 58 No 83,0001,A
+0000000133,Vendor 133 Ltda,CO,Medellin,38944,Avenida 65 No 74,0001,A
+0000000134,Vendor 134 Ltda,BR,Miami,76807,Avenida 36 No 16,LIEF,D
+0000000135,Vendor 135 Ltda,CO,Bogota,30314,Avenida 83 No 38,LIEF,C
+0000000136,Vendor 136 Ltda,CO,Miami,85998,Avenida 15 No 62,0001,B
+0000000137,Vendor 137 Ltda,CO,Mexico City,85633,Avenida 59 No 90,LIEF,C
+0000000138,Vendor 138 Ltda,BR,New York,32369,Avenida 60 No 95,LIEF,D
+0000000139,Vendor 139 Ltda,BR,New York,90382,Avenida 5 No 74,0001,B
+0000000140,Vendor 140 Ltda,MX,New York,85722,Avenida 81 No 5,0002,D
+0000000141,Vendor 141 Ltda,BR,New York,53989,Avenida 27 No 31,0002,B
+0000000142,Vendor 142 Ltda,US,Bogota,22047,Avenida 74 No 84,LIEF,D
+0000000143,Vendor 143 Ltda,MX,Mexico City,33614,Avenida 39 No 97,0002,D
+0000000144,Vendor 144 Ltda,MX,New York,59683,Avenida 68 No 66,0002,A
+0000000145,Vendor 145 Ltda,CO,Mexico City,33353,Avenida 84 No 54,0001,C
+0000000146,Vendor 146 Ltda,DE,Bogota,51038,Avenida 18 No 91,0001,B
+0000000147,Vendor 147 Ltda,DE,Bogota,32919,Avenida 23 No 43,LIEF,A
+0000000148,Vendor 148 Ltda,BR,Sao Paulo,16409,Avenida 79 No 36,0001,B
+0000000149,Vendor 149 Ltda,CO,Sao Paulo,10405,Avenida 44 No 94,0002,C
+0000000150,Vendor 150 Ltda,MX,Sao Paulo,53028,Avenida 3 No 88,0001,D
+0000000151,Vendor 151 Ltda,CO,Miami,18446,Avenida 71 No 71,0001,B
+0000000152,Vendor 152 Ltda,MX,Sao Paulo,13030,Avenida 43 No 59,0002,D
+0000000153,Vendor 153 Ltda,DE,Bogota,52568,Avenida 42 No 40,LIEF,D
+0000000154,Vendor 154 Ltda,CO,Bogota,51597,Avenida 41 No 75,LIEF,B
+0000000155,Vendor 155 Ltda,BR,Bogota,56602,Avenida 72 No 72,0002,C
+0000000156,Vendor 156 Ltda,US,Medellin,35352,Avenida 47 No 89,0002,C
+0000000157,Vendor 157 Ltda,MX,Miami,48141,Avenida 83 No 66,LIEF,C
+0000000158,Vendor 158 Ltda,BR,Sao Paulo,53485,Avenida 48 No 96,0002,A
+0000000159,Vendor 159 Ltda,US,New York,99049,Avenida 24 No 49,0001,C
+0000000160,Vendor 160 Ltda,DE,Sao Paulo,39939,Avenida 99 No 41,0001,B
+0000000161,Vendor 161 Ltda,US,Bogota,95023,Avenida 41 No 52,0001,A
+0000000162,Vendor 162 Ltda,MX,Medellin,73937,Avenida 19 No 63,0002,B
+0000000163,Vendor 163 Ltda,DE,Medellin,10456,Avenida 19 No 91,0002,C
+0000000164,Vendor 164 Ltda,CO,Mexico City,64153,Avenida 46 No 94,0002,A
+0000000165,Vendor 165 Ltda,US,Miami,79173,Avenida 43 No 90,LIEF,D
+0000000166,Vendor 166 Ltda,US,New York,11158,Avenida 8 No 2,0001,B
+0000000167,Vendor 167 Ltda,US,New York,47545,Avenida 12 No 37,0001,B
+0000000168,Vendor 168 Ltda,US,Sao Paulo,38126,Avenida 48 No 46,LIEF,D
+0000000169,Vendor 169 Ltda,MX,Sao Paulo,24189,Avenida 38 No 95,0001,A
+0000000170,Vendor 170 Ltda,US,Medellin,81229,Avenida 31 No 30,0002,A
+0000000171,Vendor 171 Ltda,DE,Sao Paulo,59666,Avenida 2 No 75,LIEF,B
+0000000172,Vendor 172 Ltda,BR,New York,67899,Avenida 41 No 96,LIEF,C
+0000000173,Vendor 173 Ltda,MX,New York,74633,Avenida 56 No 75,0002,A
+0000000174,Vendor 174 Ltda,MX,Miami,64031,Avenida 60 No 85,0002,C
+0000000175,Vendor 175 Ltda,CO,Bogota,92132,Avenida 11 No 82,0002,A
+0000000176,Vendor 176 Ltda,CO,Miami,20343,Avenida 23 No 77,LIEF,D
+0000000177,Vendor 177 Ltda,CO,Mexico City,88920,Avenida 36 No 47,0002,C
+0000000178,Vendor 178 Ltda,MX,Miami,22734,Avenida 18 No 90,0002,C
+0000000179,Vendor 179 Ltda,US,Medellin,31192,Avenida 22 No 91,LIEF,A
+0000000180,Vendor 180 Ltda,DE,Mexico City,69189,Avenida 86 No 45,0002,D
+0000000181,Vendor 181 Ltda,US,Miami,59161,Avenida 77 No 28,0002,D
+0000000182,Vendor 182 Ltda,US,Bogota,53704,Avenida 4 No 68,0002,B
+0000000183,Vendor 183 Ltda,CO,Sao Paulo,55219,Avenida 10 No 7,0001,D
+0000000184,Vendor 184 Ltda,US,Sao Paulo,33154,Avenida 2 No 5,0001,D
+0000000185,Vendor 185 Ltda,US,Medellin,41888,Avenida 72 No 85,LIEF,D
+0000000186,Vendor 186 Ltda,CO,Bogota,15496,Avenida 63 No 76,0001,A
+0000000187,Vendor 187 Ltda,US,Bogota,90906,Avenida 72 No 48,0001,C
+0000000188,Vendor 188 Ltda,MX,Medellin,12278,Avenida 45 No 89,LIEF,D
+0000000189,Vendor 189 Ltda,CO,Miami,70611,Avenida 81 No 87,0002,A
+0000000190,Vendor 190 Ltda,DE,Sao Paulo,25937,Avenida 80 No 92,0002,C
+0000000191,Vendor 191 Ltda,BR,Sao Paulo,60635,Avenida 68 No 34,0002,B
+0000000192,Vendor 192 Ltda,US,Mexico City,55765,Avenida 4 No 80,LIEF,D
+0000000193,Vendor 193 Ltda,CO,Bogota,50749,Avenida 18 No 66,LIEF,B
+0000000194,Vendor 194 Ltda,US,Medellin,32560,Avenida 95 No 60,0002,D
+0000000195,Vendor 195 Ltda,BR,New York,29730,Avenida 7 No 96,0001,B
+0000000196,Vendor 196 Ltda,MX,Miami,32651,Avenida 67 No 79,LIEF,A
+0000000197,Vendor 197 Ltda,CO,New York,98182,Avenida 69 No 21,0002,D
+0000000198,Vendor 198 Ltda,DE,Mexico City,32884,Avenida 22 No 36,LIEF,D
+0000000199,Vendor 199 Ltda,CO,Bogota,96234,Avenida 76 No 32,0001,C
+0000000200,Vendor 200 Ltda,MX,New York,70586,Avenida 90 No 2,LIEF,C
