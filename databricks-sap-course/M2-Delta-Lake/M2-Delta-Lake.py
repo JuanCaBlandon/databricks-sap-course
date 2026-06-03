@@ -57,7 +57,7 @@ CATALOG       = "laboratory_dev"
 SCHEMA        = "sap_course"
 VOLUME_PATH   = f"/Volumes/{CATALOG}/bronze/curso_databricks"
 
-spark.sql(f"USE CATALOG {CATALOG}")
+# Crear el schema si no existe
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.{SCHEMA}")
 spark.sql(f"USE {CATALOG}.{SCHEMA}")
 
