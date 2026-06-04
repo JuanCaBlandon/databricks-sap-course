@@ -84,6 +84,33 @@ for tabla in tablas_sap:
 
 # COMMAND ----------
 
+# Copiar los CSV SAP desde el repositorio al Volume
+# Ejecutar esta celda UNA SOLA VEZ después de clonar el repo
+# No es necesario descargar ni subir manualmente — todo queda dentro de Databricks
+
+import os
+
+REPO_PATH = "/Workspace/Users/donjuancho7@hotmail.com/databricks-sap-course/databricks-sap-course/datasets"
+tablas_sap   = ["BKPF","BSEG","KNA1","MARA","VBAK","VBAP","LFA1","EKKO"]
+
+print(f"Origen  : {REPO_PATH}")
+print(f"Destino : {VOLUME_PATH}")
+print()
+
+for tabla in tablas_sap:
+    src  = f"file:{REPO_PATH}/{tabla}.csv"
+    dst  = f"{VOLUME_PATH}/{tabla}.csv"
+    try:
+        dbutils.fs.cp(src, dst)
+        n = spark.read.option("header","true").csv(dst).count()
+        print(f"  OK  {tabla}.csv  →  {n:,} registros copiados al Volume")
+    except Exception as e:
+        print(f"  ERR {tabla}.csv  →  {str(e)[:80]}")
+
+print("\nListo — archivos disponibles en el Volume para el curso")
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC ## Sección 2.2: Lakehouse Federation y Conectores
 # MAGIC
