@@ -52,13 +52,13 @@
 
 # COMMAND ----------
 
-# Configuración del módulo — ajustar si tu catalog/schema son diferentes
-CATALOG       = "laboratory_dev"
-SCHEMA        = "sap_course"
-VOLUME_PATH   = f"/Volumes/{CATALOG}/bronze/curso_databricks"
+CATALOG     = "laboratory_sap_dev"
+SCHEMA      = "sap_course"
+VOLUME_PATH = f"/Volumes/{CATALOG}/bronze/curso_databricks"
 
-# Crear el schema si no existe
+spark.sql(f"CREATE CATALOG IF NOT EXISTS {CATALOG}")
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.{SCHEMA}")
+spark.sql(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.bronze")  # para el Volume
 spark.sql(f"USE {CATALOG}.{SCHEMA}")
 
 print(f"Catalog  : {CATALOG}")
@@ -176,8 +176,9 @@ from pyspark.sql.functions import (
 )
 from pyspark.sql.types import IntegerType, DoubleType
 
-# PASO 1: Cargar BKPF desde Volume como tabla Delta Bronze
-# Particionamos por GJAHR (año fiscal) — columna de baja cardinalidad, filtro frecuente
+# PASO 1: Leer BKPF.csv desde el Volume — solo lectura, aún no es una tabla Delta
+# Verificamos que el archivo está disponible y el schema es correcto
+# La escritura a Delta ocurre en la siguiente celda
 df_bkpf = (spark.read
     .option("header", "true")
     .option("inferSchema", "true")
@@ -189,7 +190,7 @@ df_bkpf.show(3, truncate=False)
 
 # COMMAND ----------
 
-# Escribir como Delta con particionamiento por año fiscal
+#opcion 1  Escribir como Delta con particionamiento por año fiscal
 (df_bkpf.write
     .format("delta")
     .mode("overwrite")
@@ -200,6 +201,31 @@ df_bkpf.show(3, truncate=False)
 n = spark.table(f"{CATALOG}.{SCHEMA}.bkpf_bronze").count()
 print(f"Tabla {CATALOG}.{SCHEMA}.bkpf_bronze creada: {n:,} registros")
 print(f"Particionada por: GJAHR (año fiscal SAP)")
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC --opcion 2 SQL:  Escribir como Delta con particionamiento por año fiscal
+# MAGIC CREATE OR REPLACE TABLE laboratory_sap_dev.sap_course.bkpf_bronze
+# MAGIC USING DELTA
+# MAGIC PARTITIONED BY (GJAHR)
+# MAGIC COMMENT 'Cabeceras de documentos contables SAP FI — tabla Bronze'
+# MAGIC TBLPROPERTIES (
+# MAGIC     'delta.enableChangeDataFeed' = 'false',
+# MAGIC     'team'   = 'summa-datos',
+# MAGIC     'source' = 'SAP-FI'
+# MAGIC )
+# MAGIC AS
+# MAGIC SELECT
+# MAGIC     *,
+# MAGIC     current_timestamp() AS _loaded_at,
+# MAGIC     'BKPF.csv'          AS _source_file
+# MAGIC FROM read_files(
+# MAGIC     '/Volumes/laboratory_sap_dev/bronze/curso_databricks/BKPF.csv',
+# MAGIC     format      => 'csv',
+# MAGIC     header      => true,
+# MAGIC     inferSchema => true
+# MAGIC )
 
 # COMMAND ----------
 
@@ -221,21 +247,22 @@ spark.sql(f"DESCRIBE HISTORY {CATALOG}.{SCHEMA}.bkpf_bronze") \
 
 # COMMAND ----------
 
-# Simular una actualización incorrecta (como si llegara un CSV de SAP con errores)
-from pyspark.sql.functions import when
-
-df_bkpf_incorrecto = spark.table(f"{CATALOG}.{SCHEMA}.bkpf_bronze") \
-    .withColumn("BKTXT", lit("DATO_INCORRECTO")) \
-    .withColumn("WAERK", lit("XXX"))  # Moneda inválida
-
-(df_bkpf_incorrecto.write
-    .format("delta")
-    .mode("overwrite")
-    .option("overwriteSchema", "true")
-    .saveAsTable(f"{CATALOG}.{SCHEMA}.bkpf_bronze"))
-
-print("Carga incorrecta simulada — datos corruptos en la tabla")
-spark.sql(f"SELECT BELTXT, WAERK FROM {CATALOG}.{SCHEMA}.bkpf_bronze LIMIT 3").show()
+# MAGIC
+# MAGIC %sql
+# MAGIC
+# MAGIC -- Simular carga incorrecta de SAP — corrompe BKTXT y WAERK en toda la tabla
+# MAGIC -- En producción: equivale a que el extracto SAP llegó con valores por defecto incorrectos
+# MAGIC
+# MAGIC UPDATE laboratory_sap_dev.sap_course.bkpf_bronze
+# MAGIC SET 
+# MAGIC     BKTXT = 'DATO_INCORRECTO',
+# MAGIC     WAERK = 'XXX'  -- Moneda inválida en SAP
+# MAGIC ;
+# MAGIC
+# MAGIC -- Verificar el daño
+# MAGIC SELECT BKTXT, WAERK, COUNT(*) AS registros
+# MAGIC FROM laboratory_sap_dev.sap_course.bkpf_bronze
+# MAGIC GROUP BY BKTXT, WAERK
 
 # COMMAND ----------
 
