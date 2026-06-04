@@ -377,29 +377,74 @@ spark.sql(f"VACUUM {CATALOG}.{SCHEMA}.bkpf_bronze RETAIN 168 HOURS DRY RUN")
 
 # COMMAND ----------
 
-# Cargar VBAK (órdenes de venta) con CDF habilitado desde el inicio
+# PASO 1 — Bronze: fiel al CSV, sin transformaciones
 df_vbak = (spark.read
     .option("header", "true")
     .option("inferSchema", "true")
     .csv(f"{VOLUME_PATH}/VBAK.csv"))
 
-# Crear tabla con CDF habilitado
-spark.sql(f"""
-    CREATE OR REPLACE TABLE {CATALOG}.{SCHEMA}.vbak_silver
-    USING DELTA
-    TBLPROPERTIES (delta.enableChangeDataFeed = true)
-    AS SELECT * FROM delta.`{VOLUME_PATH}/VBAK.csv`
-    WHERE 1=0
-""")
-
-# Carga inicial
 (df_vbak.write
-    .format("delta")
     .mode("overwrite")
     .option("overwriteSchema", "true")
+    .saveAsTable(f"{CATALOG}.{SCHEMA}.vbak_bronze"))
+
+print(f"vbak_bronze: {spark.table(f'{CATALOG}.{SCHEMA}.vbak_bronze').count():,} registros")
+
+# COMMAND ----------
+
+from pyspark.sql.functions import (
+    col, to_date, lpad, current_timestamp, lit, when
+)
+
+# Paso 1 — Leer raw
+df_vbak_raw = (spark.read
+    .option("header", "true")
+    .option("inferSchema", "true")
+    .csv(f"{VOLUME_PATH}/VBAK.csv"))
+
+# Paso 2 — Crear tabla vacía con schema limpio + CDF
+spark.sql(f"""
+    CREATE OR REPLACE TABLE {CATALOG}.{SCHEMA}.vbak_silver (
+        VBELN   STRING  COMMENT 'Número orden de venta (con ceros: 0000000001)',
+        ERDAT   DATE    COMMENT 'Fecha de creación de la orden',
+        KUNNR   STRING  COMMENT 'Código cliente (con ceros: 0000000312)',
+        VKORG   STRING  COMMENT 'Organización de ventas',
+        VTWEG   STRING  COMMENT 'Canal de distribución',
+        SPART   STRING  COMMENT 'División',
+        NETWR   DOUBLE  COMMENT 'Valor neto de la orden en moneda WAERK',
+        WAERK   STRING  COMMENT 'Moneda: COP, USD, EUR',
+        AUART   STRING  COMMENT 'Tipo de orden: ZOR=Estándar, OR=Urgente, RE=Devolución, CR=Crédito',
+        _loaded_at  TIMESTAMP COMMENT 'Timestamp de carga en Databricks'
+    )
+    TBLPROPERTIES (delta.enableChangeDataFeed = true)
+""")
+
+# Paso 3 — Transformar y insertar
+df_vbak_silver = (df_vbak_raw
+    # Fechas SAP: int yyyyMMdd → DATE
+    .withColumn("ERDAT", to_date(col("ERDAT").cast("string"), "yyyyMMdd"))
+    # Códigos SAP: rellenar ceros a la izquierda como en SAP real
+    .withColumn("VBELN", lpad(col("VBELN").cast("string"), 10, "0"))
+    .withColumn("KUNNR", lpad(col("KUNNR").cast("string"), 10, "0"))
+    .withColumn("VKORG", col("VKORG").cast("string"))
+    .withColumn("VTWEG", col("VTWEG").cast("string"))
+    .withColumn("SPART", col("SPART").cast("string"))
+    # Auditoría
+    .withColumn("_loaded_at", current_timestamp())
+)
+
+(df_vbak_silver.write
+    .mode("append")       # append para que CDF registre los inserts
     .saveAsTable(f"{CATALOG}.{SCHEMA}.vbak_silver"))
 
-print(f"vbak_silver con CDF: {spark.table(f'{CATALOG}.{SCHEMA}.vbak_silver').count():,} registros")
+print(f"vbak_silver: {spark.table(f'{CATALOG}.{SCHEMA}.vbak_silver').count():,} registros")
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC SELECT _change_type, count(*) as total
+# MAGIC FROM table_changes('laboratory_sap_dev.sap_course.vbak_silver', 0)
+# MAGIC GROUP BY _change_type
 
 # COMMAND ----------
 
@@ -422,19 +467,150 @@ print("INSERT aplicado: 10 nuevas órdenes simuladas")
 
 # COMMAND ----------
 
-# Leer SOLO los cambios con CDF desde la versión 1
+# Leer CDF y registrar como vista temporal
 cambios = (spark.read
-    .format("delta")
     .option("readChangeFeed", "true")
     .option("startingVersion", 1)
     .table(f"{CATALOG}.{SCHEMA}.vbak_silver"))
 
-print("=== CAMBIOS CAPTURADOS POR CDF ===")
-print(f"Total registros de cambio: {cambios.count():,}")
-cambios.groupBy("_change_type").count().orderBy("_change_type").show()
+cambios.createOrReplaceTempView("vw_cambios")
 
-print("\nDetalle de los cambios (primeras 5 filas):")
-cambios.select("VBELN","AUART","NETWR","_change_type","_commit_version","_commit_timestamp").show(5)
+# Ahora consultar desde SQL — las columnas _ se resuelven bien
+print("=== CAMBIOS CAPTURADOS POR CDF ===")
+print(f"Total: {cambios.count():,} registros")
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC -- Resumen por tipo de cambio
+# MAGIC SELECT _change_type, count(*) as total
+# MAGIC FROM vw_cambios
+# MAGIC GROUP BY _change_type
+# MAGIC ORDER BY _change_type
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC DESCRIBE HISTORY laboratory_sap_dev.sap_course.vbak_silver
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC SELECT _change_type, count(*) as total
+# MAGIC FROM table_changes('laboratory_sap_dev.sap_course.vbak_silver', 2)
+# MAGIC GROUP BY _change_type
+# MAGIC ORDER BY _change_type
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC SELECT 
+# MAGIC     _change_type,
+# MAGIC     VBELN,
+# MAGIC     AUART,
+# MAGIC     ROUND(NETWR, 2) as NETWR,
+# MAGIC     _commit_version,
+# MAGIC     _commit_timestamp
+# MAGIC FROM table_changes('laboratory_sap_dev.sap_course.vbak_silver', 2)
+# MAGIC WHERE _change_type IN ('update_preimage', 'update_postimage')
+# MAGIC ORDER BY VBELN, _change_type
+# MAGIC LIMIT 6
+
+# COMMAND ----------
+
+from pyspark.sql.functions import year, month, col, round, when
+
+# Leer Silver completa para la carga inicial de Gold
+df_gold = (spark.table(f"{CATALOG}.{SCHEMA}.vbak_silver")
+    # Renombrar campos a español
+    .withColumnRenamed("VBELN", "numero_orden")
+    .withColumnRenamed("ERDAT", "fecha_creacion")
+    .withColumnRenamed("KUNNR", "codigo_cliente")
+    .withColumnRenamed("VKORG", "org_ventas")
+    .withColumnRenamed("VTWEG", "canal_distribucion")
+    .withColumnRenamed("SPART", "division")
+    .withColumnRenamed("WAERK", "moneda")
+    .withColumnRenamed("AUART", "tipo_orden")
+    # Redondear monto
+    .withColumn("valor_neto", round(col("NETWR"), 2))
+    .drop("NETWR")
+    # Columnas calculadas
+    .withColumn("anio_creacion", year(col("fecha_creacion")))
+    .withColumn("mes_creacion", month(col("fecha_creacion")))
+    .withColumn("es_devolucion", 
+        when(col("tipo_orden").isin("RE", "CR"), True)
+        .otherwise(False))
+    .drop("_loaded_at")
+)
+
+# Crear tabla Gold con comments para Genie
+spark.sql(f"""
+    CREATE OR REPLACE TABLE {CATALOG}.{SCHEMA}.vbak_gold (
+        numero_orden        STRING  COMMENT 'Número de orden de venta SAP (10 dígitos)',
+        fecha_creacion      DATE    COMMENT 'Fecha en que se creó la orden en SAP',
+        codigo_cliente      STRING  COMMENT 'Código del cliente que hizo el pedido',
+        org_ventas          STRING  COMMENT 'Organización de ventas: 1000=Colombia, 2000=Internacional',
+        canal_distribucion  STRING  COMMENT 'Canal: 10=Directo, 20=Indirecto, 30=Online',
+        division            STRING  COMMENT 'División de negocio del 1 al 5',
+        moneda              STRING  COMMENT 'Moneda del pedido: COP, USD, EUR',
+        tipo_orden          STRING  COMMENT 'Tipo: ZOR=Estándar, OR=Urgente, RE=Devolución, CR=Crédito',
+        valor_neto          DOUBLE  COMMENT 'Valor neto de la orden redondeado a 2 decimales',
+        anio_creacion       INT     COMMENT 'Año de creación extraído de fecha_creacion',
+        mes_creacion        INT     COMMENT 'Mes de creación extraído de fecha_creacion (1-12)',
+        es_devolucion       BOOLEAN COMMENT 'TRUE si la orden es una devolución o nota crédito'
+    )
+    TBLPROPERTIES (delta.enableChangeDataFeed = true)
+""")
+
+# Carga inicial
+(df_gold.write
+    .mode("append")
+    .saveAsTable(f"{CATALOG}.{SCHEMA}.vbak_gold"))
+
+print(f"vbak_gold: {spark.table(f'{CATALOG}.{SCHEMA}.vbak_gold').count():,} registros")
+
+# COMMAND ----------
+
+df_cambios = spark.sql(f"""
+    WITH cambios_rankeados AS (
+        SELECT 
+            VBELN           as numero_orden,
+            ERDAT           as fecha_creacion,
+            KUNNR           as codigo_cliente,
+            VKORG           as org_ventas,
+            VTWEG           as canal_distribucion,
+            SPART           as division,
+            WAERK           as moneda,
+            AUART           as tipo_orden,
+            ROUND(NETWR, 2) as valor_neto,
+            year(ERDAT)     as anio_creacion,
+            month(ERDAT)    as mes_creacion,
+            CASE WHEN AUART IN ('RE','CR') THEN true ELSE false END as es_devolucion,
+            _commit_version,
+            ROW_NUMBER() OVER (
+                PARTITION BY VBELN 
+                ORDER BY _commit_version DESC  -- quedarse con la más reciente
+            ) as rn
+        FROM table_changes('{CATALOG}.{SCHEMA}.vbak_silver', 2)
+        WHERE _change_type IN ('update_postimage', 'insert')
+    )
+    SELECT * EXCEPT (rn, _commit_version)
+    FROM cambios_rankeados
+    WHERE rn = 1
+""")
+
+df_cambios.createOrReplaceTempView("vw_cambios_gold")
+
+spark.sql(f"""
+    MERGE INTO {CATALOG}.{SCHEMA}.vbak_gold AS target
+    USING vw_cambios_gold AS source
+    ON target.numero_orden = source.numero_orden
+    WHEN MATCHED THEN UPDATE SET *
+    WHEN NOT MATCHED THEN INSERT *
+""")
+
+print("MERGE completado")
+print(f"vbak_gold total: {spark.table(f'{CATALOG}.{SCHEMA}.vbak_gold').count():,} registros")
 
 # COMMAND ----------
 
