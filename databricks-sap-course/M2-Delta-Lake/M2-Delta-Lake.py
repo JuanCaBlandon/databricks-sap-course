@@ -694,6 +694,8 @@ spark.sql(f"""
 
 # COMMAND ----------
 
+from pyspark.sql.functions import current_timestamp, lit
+
 tablas_config = {
     "BKPF": {"partition": "GJAHR",  "desc": "Cabeceras documentos contables FI"},
     "BSEG": {"partition": "GJAHR",  "desc": "Posiciones documentos contables FI"},

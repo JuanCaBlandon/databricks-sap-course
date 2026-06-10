@@ -24,8 +24,12 @@
 
 # COMMAND ----------
 
-spark.sql("USE sap_course")
+spark.sql("USE laboratory_sap_dev.sap_course")
 print("Módulo 3: Databricks SQL")
+
+# COMMAND ----------
+
+
 
 # COMMAND ----------
 
@@ -94,10 +98,10 @@ pipeline_ventas = spark.sql("""
     WITH base_ventas AS (
         SELECT
             v.VBELN, v.KUNNR, v.VKORG, v.AUART, v.NETWR,
-            YEAR(v.ERDAT_DT)    AS anio,
-            MONTH(v.ERDAT_DT)   AS mes
+            YEAR(v.ERDAT)    AS anio,
+            MONTH(v.ERDAT)   AS mes
         FROM sap_course.vbak_silver v
-        WHERE v._is_valid = TRUE AND v.ERDAT_DT IS NOT NULL
+        WHERE  v.ERDAT IS NOT NULL
     ),
     metricas_cliente AS (
         SELECT
@@ -143,14 +147,14 @@ pipeline_ventas.show(truncate=False)
 analisis_temporal = spark.sql("""
     WITH ventas_mensuales AS (
         SELECT
-            YEAR(ERDAT_DT)              AS anio,
-            MONTH(ERDAT_DT)             AS mes,
+            YEAR(ERDAT)              AS anio,
+            MONTH(ERDAT)             AS mes,
             VKORG                       AS org_ventas,
             ROUND(SUM(NETWR), 2)        AS ventas_mes,
             COUNT(DISTINCT VBELN)       AS num_ordenes
         FROM sap_course.vbak_silver
-        WHERE _is_valid = TRUE AND ERDAT_DT IS NOT NULL
-        GROUP BY YEAR(ERDAT_DT), MONTH(ERDAT_DT), VKORG
+        WHERE ERDAT IS NOT NULL
+        GROUP BY YEAR(ERDAT), MONTH(ERDAT), VKORG
     )
     SELECT
         anio, mes, org_ventas, ventas_mes, num_ordenes,
@@ -169,16 +173,7 @@ analisis_temporal = spark.sql("""
         ROUND(SUM(ventas_mes) OVER (
             PARTITION BY org_ventas, anio ORDER BY mes
             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-        ), 2)                                           AS ventas_ytd,
-        -- Media móvil 3 meses
-        ROUND(AVG(ventas_mes) OVER (
-            PARTITION BY org_ventas ORDER BY anio, mes
-            ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
-        ), 2)                                           AS media_movil_3m,
-        -- Ranking mensual
-        RANK() OVER (
-            PARTITION BY anio, mes ORDER BY ventas_mes DESC
-        )                                               AS ranking_mes
+        ), 2)                                           AS ventas_ytd
     FROM ventas_mensuales
     ORDER BY org_ventas, anio, mes
 """)
@@ -303,13 +298,13 @@ spark.sql("""
 # Viz 1: Revenue mensual — gráfico de líneas por org de ventas
 display(spark.sql("""
     SELECT
-        CONCAT(YEAR(ERDAT_DT),'-',LPAD(MONTH(ERDAT_DT),2,'0'))  AS periodo,
-        VKORG                                                      AS org_ventas,
-        ROUND(SUM(NETWR), 2)                                       AS revenue
-    FROM sap_course.vbak_silver
-    WHERE _is_valid = TRUE AND ERDAT_DT IS NOT NULL
-    GROUP BY periodo, VKORG
-    ORDER BY periodo
+    CONCAT(anio_creacion, '-', LPAD(mes_creacion, 2, '0')) AS periodo,
+    org_ventas,
+    ROUND(SUM(valor_neto), 2) AS revenue_total
+FROM laboratory_sap_dev.sap_course.vbak_gold
+WHERE es_devolucion = FALSE
+GROUP BY periodo, org_ventas
+ORDER BY periodo
 """))
 
 # COMMAND ----------
@@ -317,16 +312,14 @@ display(spark.sql("""
 # Viz 2: Top 10 clientes — gráfico de barras horizontal
 display(spark.sql("""
     SELECT
-        k.NAME1                         AS cliente,
-        k.LAND1                         AS pais,
-        ROUND(SUM(v.NETWR), 2)         AS revenue_total,
-        COUNT(DISTINCT v.VBELN)        AS num_ordenes
-    FROM sap_course.vbak_silver v
-    JOIN sap_course.kna1_bronze k ON v.KUNNR = k.KUNNR
-    WHERE v._is_valid = TRUE
-    GROUP BY k.NAME1, k.LAND1
-    ORDER BY revenue_total DESC
-    LIMIT 10
+    codigo_cliente,
+    ROUND(SUM(valor_neto), 2)      AS revenue_total,
+    COUNT(DISTINCT numero_orden)   AS total_ordenes
+FROM laboratory_sap_dev.sap_course.vbak_gold
+WHERE es_devolucion = FALSE
+GROUP BY codigo_cliente
+ORDER BY revenue_total DESC
+LIMIT 10
 """))
 
 # COMMAND ----------
@@ -334,12 +327,12 @@ display(spark.sql("""
 # Viz 3: KPIs ejecutivos 2023 — tarjetas métricas
 display(spark.sql("""
     SELECT
-        ROUND(SUM(NETWR)/1000000, 2)   AS revenue_total_millones,
-        COUNT(DISTINCT VBELN)          AS total_ordenes,
-        COUNT(DISTINCT KUNNR)          AS clientes_activos,
-        ROUND(AVG(NETWR), 2)           AS ticket_promedio
-    FROM sap_course.vbak_silver
-    WHERE _is_valid = TRUE AND YEAR(ERDAT_DT) = 2023
+    ROUND(SUM(valor_neto), 2)           AS revenue_total,
+    COUNT(DISTINCT numero_orden)        AS total_ordenes,
+    COUNT(DISTINCT codigo_cliente)      AS clientes_activos,
+    ROUND(AVG(valor_neto), 2)           AS ticket_promedio,
+    SUM(CASE WHEN es_devolucion THEN 1 ELSE 0 END) AS devoluciones
+FROM laboratory_sap_dev.sap_course.vbak_gold
 """))
 
 # COMMAND ----------
@@ -347,15 +340,13 @@ display(spark.sql("""
 # Viz 4: Revenue por país — gráfico de torta
 display(spark.sql("""
     SELECT
-        k.LAND1                         AS pais,
-        ROUND(SUM(v.NETWR), 2)         AS revenue,
-        ROUND(SUM(v.NETWR) /
-            SUM(SUM(v.NETWR)) OVER () * 100, 2)  AS pct_total
-    FROM sap_course.vbak_silver v
-    JOIN sap_course.kna1_bronze k ON v.KUNNR = k.KUNNR
-    WHERE v._is_valid = TRUE
-    GROUP BY k.LAND1
-    ORDER BY revenue DESC
+    canal_distribucion,
+    ROUND(SUM(valor_neto), 2)    AS revenue_total,
+    COUNT(DISTINCT numero_orden) AS ordenes
+FROM laboratory_sap_dev.sap_course.vbak_gold
+WHERE es_devolucion = FALSE
+GROUP BY canal_distribucion
+ORDER BY revenue_total DESC
 """))
 
 # COMMAND ----------
