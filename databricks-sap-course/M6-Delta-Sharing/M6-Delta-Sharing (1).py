@@ -11,6 +11,14 @@
 # MAGIC - Preparar el terreno para la integración SAP del Módulo 7
 # MAGIC
 # MAGIC ---
+# MAGIC ## 📅 Este módulo se trabaja en DOS clases
+# MAGIC
+# MAGIC | Clase | Contenido | Secciones |
+# MAGIC |---|---|---|
+# MAGIC | **Jueves (C8)** — El lado del PROVIDER | Teoría, arquitectura, tipos de recipients, crear el share completo en el Trial | 6.1 — 6.4 + Lab Parte 1 |
+# MAGIC | **Viernes (C9)** — El lado del RECIPIENT | Consumir el share, Time Travel y CDF cross-workspace, costos, auditoría, buenas prácticas | 6.5 — 6.10 + Lab Parte 2 |
+# MAGIC
+# MAGIC ---
 # MAGIC ## 6.1 ¿Qué es Delta Sharing y por qué cambia las reglas?
 # MAGIC
 # MAGIC ### El problema que resuelve
@@ -34,7 +42,9 @@
 
 # COMMAND ----------
 
-spark.sql("USE sap_course")
+CATALOG = "laboratory_sap_dev"
+SCHEMA  = "sap_course"
+spark.sql(f"USE {CATALOG}.{SCHEMA}")
 print("Módulo 6: Delta Sharing")
 print("NOTA: Las operaciones de CREATE SHARE requieren el trial de 14 días")
 print("      con Unity Catalog habilitado y privilegios CREATE PROVIDER/RECIPIENT")
@@ -83,13 +93,12 @@ tablas_gold = {
     "gold_fin_summary"      : "KPIs financieros SAP por sociedad/ejercicio",
     "gold_sales_kpis"       : "Métricas de ventas mensuales SAP",
     "gold_customer_360"     : "Vista 360 del cliente SAP con tier y LTV",
-    "gold_rfm_segmentation" : "Segmentación RFM de clientes",
-    "gold_forecast_features": "Features para forecasting de ventas",
+    "vbak_gold"             : "Órdenes de venta en español (Genie Space)",
 }
 
 for tabla, desc in tablas_gold.items():
     try:
-        n = spark.table(f"sap_course.{tabla}").count()
+        n = spark.table(f"{CATALOG}.{SCHEMA}.{tabla}").count()
         print(f"  OK  sap_course.{tabla:<30} {n:>8,} filas")
     except:
         print(f"  ERR sap_course.{tabla} — ejecutar Módulo 5 primero")
@@ -198,6 +207,14 @@ TIPO 3: SAP BDC Connect (específico para SAP BDC)
 # COMMAND ----------
 
 # MAGIC %md
+# MAGIC # ════════ FIN CLASE 8 (jueves) · INICIO CLASE 9 (viernes) ════════
+# MAGIC **Recap C8**: qué es Delta Sharing, arquitectura Share/Recipient, tipos de sharing,
+# MAGIC y el share `curso_sap_share` creado en el Trial con `WITH HISTORY`.
+# MAGIC **Hoy C9**: el lado del recipient — consumir, Time Travel, CDF, costos y producción.
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC ## 6.5 Delta Sharing como CONSUMIDOR — Leer shares externos
 
 # COMMAND ----------
@@ -211,7 +228,7 @@ TIPO 3: SAP BDC Connect (específico para SAP BDC)
 # MAGIC
 # MAGIC # Cargar el share con el archivo de credenciales
 # MAGIC share_name  = "sap_analytics_share"
-# MAGIC profile     = "/dbfs/FileStore/credentials/sap_bdc.share"
+# MAGIC profile     = "/Volumes/laboratory_sap_dev/bronze/curso_databricks/credentials/sap_bdc.share"
 # MAGIC
 # MAGIC # Listar tablas disponibles en el share
 # MAGIC df_shares = (spark.read
@@ -253,22 +270,22 @@ TIPO 3: SAP BDC Connect (específico para SAP BDC)
 # MAGIC -- Compartir solo columnas específicas (sin datos sensibles)
 # MAGIC -- Útil cuando las tablas SAP tienen campos de PII (nombre, dirección)
 # MAGIC ALTER SHARE sap_analytics_share
-# MAGIC   ADD TABLE sap_course.kna1_bronze
+# MAGIC   ADD TABLE laboratory_sap_dev.sap_course.kna1_bronze
 # MAGIC   PARTITION (LAND1 = 'CO')              -- Solo clientes Colombia
 # MAGIC   AS customers.colombia_customers;
 # MAGIC
 # MAGIC -- Crear vista para enmascarar columnas sensibles
-# MAGIC CREATE VIEW sap_course.vw_customer_masked AS
+# MAGIC CREATE VIEW laboratory_sap_dev.sap_course.vw_customer_masked AS
 # MAGIC   SELECT
 # MAGIC     KUNNR,
 # MAGIC     SUBSTR(NAME1, 1, 3) || '***'    AS nombre_masked,
 # MAGIC     LAND1,
 # MAGIC     ORT01
-# MAGIC   FROM sap_course.kna1_bronze;
+# MAGIC   FROM laboratory_sap_dev.sap_course.kna1_bronze;
 # MAGIC
 # MAGIC -- Compartir la vista enmascarada en vez de la tabla original
 # MAGIC ALTER SHARE sap_analytics_share
-# MAGIC   ADD TABLE sap_course.vw_customer_masked
+# MAGIC   ADD TABLE laboratory_sap_dev.sap_course.vw_customer_masked
 # MAGIC   AS customers.customers_masked;
 # MAGIC ```
 
@@ -349,11 +366,10 @@ LIMITACIONES REALES DE PRODUCCIÓN (para el M8):
 print("=== Verificación previa al lab de Delta Sharing ===\n")
 
 tablas_requeridas = [
-    ("sap_course.gold_fin_summary",      "Requerida para share finance"),
-    ("sap_course.gold_sales_kpis",       "Requerida para share sales"),
-    ("sap_course.gold_customer_360",     "Requerida para share customers"),
-    ("sap_course.vbak_silver",           "Requerida para share ventas raw"),
-    ("sap_course.bkpf_bronze",           "Requerida para share finanzas raw"),
+    ("laboratory_sap_dev.sap_course.gold_fin_summary",  "Share finance"),
+    ("laboratory_sap_dev.sap_course.gold_sales_kpis",   "Share sales"),
+    ("laboratory_sap_dev.sap_course.gold_customer_360", "Share customers"),
+    ("laboratory_sap_dev.sap_course.vbak_gold",         "Share comercial (la del Genie)"),
 ]
 
 todas_ok = True
@@ -381,9 +397,22 @@ else:
 # MAGIC   COMMENT 'Share del curso SAP + Databricks';
 # MAGIC
 # MAGIC -- PASO 2: Agregar tablas
-# MAGIC ALTER SHARE curso_sap_share ADD TABLE sap_course.gold_fin_summary;
-# MAGIC ALTER SHARE curso_sap_share ADD TABLE sap_course.gold_sales_kpis;
-# MAGIC ALTER SHARE curso_sap_share ADD TABLE sap_course.gold_customer_360;
+# MAGIC ALTER SHARE curso_sap_share ADD TABLE laboratory_sap_dev.sap_course.gold_fin_summary;
+# MAGIC ALTER SHARE curso_sap_share ADD TABLE laboratory_sap_dev.sap_course.gold_sales_kpis;
+# MAGIC ALTER SHARE curso_sap_share ADD TABLE laboratory_sap_dev.sap_course.gold_customer_360;
+# MAGIC ALTER SHARE curso_sap_share ADD TABLE laboratory_sap_dev.sap_course.vbak_gold;
+# MAGIC
+# MAGIC -- PASO 2b: compartir vbak_gold CON HISTORIA Y CDF (la versión completa)
+# MAGIC -- Primero la tabla debe tener Change Data Feed habilitado:
+# MAGIC ALTER TABLE laboratory_sap_dev.sap_course.vbak_gold
+# MAGIC   SET TBLPROPERTIES (delta.enableChangeDataFeed = true);
+# MAGIC
+# MAGIC -- Quitar y volver a agregar con history + CDF:
+# MAGIC ALTER SHARE curso_sap_share REMOVE TABLE laboratory_sap_dev.sap_course.vbak_gold;
+# MAGIC ALTER SHARE curso_sap_share
+# MAGIC   ADD TABLE laboratory_sap_dev.sap_course.vbak_gold
+# MAGIC   WITH HISTORY;
+# MAGIC -- WITH HISTORY habilita: Time Travel + Streaming + CDF en el recipient
 # MAGIC
 # MAGIC -- PASO 3: Crear recipient (Open Sharing para simular SAC)
 # MAGIC CREATE RECIPIENT IF NOT EXISTS recipient_sac_demo
@@ -406,6 +435,32 @@ else:
 # MAGIC   USING SHARE <tu_metastore_id>.curso_sap_share;
 # MAGIC
 # MAGIC SELECT * FROM datos_sap_compartidos.sap_course.gold_sales_kpis LIMIT 10;
+# MAGIC
+# MAGIC -- PASO 8: EL MOMENTO DEL LAB — datos en vivo, zero-copy
+# MAGIC -- En el PROVIDER (Trial): modificar un registro
+# MAGIC UPDATE laboratory_sap_dev.sap_course.vbak_gold
+# MAGIC   SET valor_neto = valor_neto * 2
+# MAGIC   WHERE numero_orden = (SELECT MIN(numero_orden) FROM laboratory_sap_dev.sap_course.vbak_gold);
+# MAGIC
+# MAGIC -- En el RECIPIENT (Free): consultar inmediatamente
+# MAGIC SELECT numero_orden, valor_neto
+# MAGIC FROM datos_sap_compartidos.sap_course.vbak_gold
+# MAGIC ORDER BY numero_orden LIMIT 1;
+# MAGIC -- El cambio aparece AL INSTANTE — sin sync, sin ETL, sin copia. Eso es Delta Sharing.
+# MAGIC
+# MAGIC -- PASO 9: TIME TRAVEL sobre la tabla compartida (gracias a WITH HISTORY)
+# MAGIC -- En el RECIPIENT:
+# MAGIC SELECT * FROM datos_sap_compartidos.sap_course.vbak_gold VERSION AS OF 0 LIMIT 5;
+# MAGIC -- Comparar con la versión actual — el recipient ve el historial completo
+# MAGIC
+# MAGIC -- PASO 10: IDENTIFICAR DATA NUEVA con CDF cross-workspace
+# MAGIC -- En el RECIPIENT (Python):
+# MAGIC -- cambios = (spark.read
+# MAGIC --     .option("readChangeFeed", "true")
+# MAGIC --     .option("startingVersion", ultima_version_procesada)
+# MAGIC --     .table("datos_sap_compartidos.sap_course.vbak_gold")
+# MAGIC --     .filter("_change_type IN ('insert', 'update_postimage')"))
+# MAGIC -- El mismo patrón CDF+MERGE del Módulo 3 — ahora ENTRE workspaces/empresas
 # MAGIC ```
 
 # COMMAND ----------
@@ -453,6 +508,41 @@ Delta Sharing Open Source Server:
 # COMMAND ----------
 
 # MAGIC %md
+# MAGIC ## 6.10 Buenas prácticas de producción + costos
+# MAGIC
+# MAGIC ### ✅ Checklist del provider (lo que Summa haría como publicador)
+# MAGIC
+# MAGIC 1. **Solo Gold**: nunca compartir Bronze/Silver — datos de negocio con nombres claros
+# MAGIC 2. **WITH HISTORY + CDF** en tablas que el recipient necesita sincronizar incrementalmente
+# MAGIC 3. **Vistas enmascaradas** para PII (NAME1, direcciones) — compartir la vista, no la tabla
+# MAGIC 4. **Particiones en el share** cuando el recipient solo necesita un subconjunto (LAND1='CO')
+# MAGIC 5. **Un share por dominio de negocio** (comercial, financiero) — no un mega-share de todo
+# MAGIC 6. **Rotar tokens cada 90 días** en Open Sharing · preferir D2D cuando ambos son Databricks
+# MAGIC 7. **Auditar mensualmente**: system.access.audit con event_type deltaSharing*
+# MAGIC
+# MAGIC ### 💰 Quién paga qué en Delta Sharing
+# MAGIC
+# MAGIC | Concepto | Quién paga | Nota |
+# MAGIC |---|---|---|
+# MAGIC | El share (la feature) | Nadie | Compartir es gratis |
+# MAGIC | Compute de las queries | El **recipient** | Su propio warehouse/cluster |
+# MAGIC | Egress misma región | $0 | El caso Summa: ambos workspaces en la misma región |
+# MAGIC | Egress cross-region/cloud | El **provider** | Centavos/GB — pero suma con volumen |
+# MAGIC
+# MAGIC ### 💡 El tip de oro: CDF también controla el egress
+# MAGIC Si el recipient está en otra región/cloud, en vez de consultar la tabla remota cada vez
+# MAGIC (egress por query), mantiene una **réplica local que refresca solo con los cambios del CDF**.
+# MAGIC El egress se limita a los deltas — no a releer toda la tabla. CDF no es solo para
+# MAGIC identificar data nueva: es la estrategia de control de costos cross-region.
+# MAGIC
+# MAGIC ### 📦 Qué metadatos viajan con el share
+# MAGIC - ✅ Schema y tipos de columnas — siempre
+# MAGIC - ✅ Comments de tablas y columnas (los que hicieron en español) — en D2D
+# MAGIC - ❌ TBLPROPERTIES, constraints, permisos internos — el recipient solo recibe lectura
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC ## Resumen del Módulo 6
 # MAGIC
 # MAGIC OK Delta Sharing: protocolo abierto para compartir datos sin moverlos  
@@ -463,5 +553,9 @@ Delta Sharing Open Source Server:
 # MAGIC OK Multi-cloud: AWS, Azure, GCP — cross-cloud soportado desde nov 2025  
 # MAGIC OK Limitaciones reales: sin history sharing a BDC, tokens cada 90 días  
 # MAGIC OK Delta Sharing OSS: disponible sin Databricks para Free Edition  
+# MAGIC OK WITH HISTORY: Time Travel + Streaming + CDF en el recipient  
+# MAGIC OK CDF cross-workspace: identificar data nueva Y controlar egress  
+# MAGIC OK Costos: compartir gratis, recipient paga su compute, egress solo cross-region  
 # MAGIC
 # MAGIC Proximo modulo: SAP + Databricks — usar todo esto para la integracion real con SAP BDC
+
