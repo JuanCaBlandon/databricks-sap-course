@@ -206,8 +206,8 @@ spark.table("laboratory_sap_dev.sap_course.gold_fin_summary").show()
 spark.sql("""
     CREATE OR REPLACE TABLE laboratory_sap_dev.sap_course.gold_sales_kpis AS
     SELECT
-        v.YEAR                                     AS year,
-        v.MONTH                                    AS month,
+        YEAR(v.ERDAT)                              AS year,
+        MONTH(v.ERDAT)                             AS month,
         v.VKORG                                    AS sales_org,
         v.WAERK                                    AS currency,
         COUNT(DISTINCT v.VBELN)                    AS num_orders,
@@ -217,11 +217,14 @@ spark.sql("""
         ROUND(MAX(v.NETWR), 2)                     AS max_order_value,
         ROUND(MIN(v.NETWR), 2)                     AS min_order_value
     FROM laboratory_sap_dev.sap_course.vbak_silver v
-    WHERE v._is_valid = TRUE
-    GROUP BY v.YEAR, v.MONTH, v.VKORG, v.WAERK
-    ORDER BY v.YEAR DESC, v.MONTH DESC, total_revenue DESC
+    WHERE v.VBELN  IS NOT NULL
+      AND v.NETWR  IS NOT NULL
+      AND v.NETWR  > 0
+      AND v.ERDAT  IS NOT NULL
+    GROUP BY YEAR(v.ERDAT), MONTH(v.ERDAT), v.VKORG, v.WAERK
+    ORDER BY year DESC, month DESC, total_revenue DESC
 """)
-print("GOLD: sales_kpis creado")
+print("✅ GOLD: gold_sales_kpis creado")
 spark.table("laboratory_sap_dev.sap_course.gold_sales_kpis").show(10)
 
 # COMMAND ----------
@@ -230,34 +233,40 @@ spark.table("laboratory_sap_dev.sap_course.gold_sales_kpis").show(10)
 spark.sql("""
     CREATE OR REPLACE TABLE laboratory_sap_dev.sap_course.gold_customer_360 AS
     SELECT
-        k.KUNNR                                    AS customer_id,
-        k.NAME1                                    AS customer_name,
-        k.LAND1                                    AS country,
-        k.ORT01                                    AS city,
-        COUNT(DISTINCT v.VBELN)                    AS total_orders,
-        ROUND(SUM(v.NETWR), 2)                     AS total_revenue,
-        ROUND(AVG(v.NETWR), 2)                     AS avg_order_value,
-        MIN(v.ERDAT_DT)                            AS first_order_date,
-        MAX(v.ERDAT_DT)                            AS last_order_date,
-        DATEDIFF(MAX(v.ERDAT_DT), MIN(v.ERDAT_DT)) AS customer_lifetime_days,
+        k.codigo_cliente                             AS customer_id,
+        k.nombre_cliente                             AS customer_name,
+        k.pais                                       AS country,
+        k.ciudad                                     AS city,
+        k.sector_industria                           AS industry_sector,
+        COUNT(DISTINCT v.VBELN)                      AS total_orders,
+        ROUND(SUM(v.NETWR),  2)                      AS total_revenue,
+        ROUND(AVG(v.NETWR),  2)                      AS avg_order_value,
+        MIN(v.ERDAT)                                 AS first_order_date,
+        MAX(v.ERDAT)                                 AS last_order_date,
+        DATEDIFF(MAX(v.ERDAT), MIN(v.ERDAT))         AS customer_lifetime_days,
         CASE
-            WHEN SUM(v.NETWR) > 500000  THEN 'PLATINUM'
-            WHEN SUM(v.NETWR) > 100000  THEN 'GOLD'
-            WHEN SUM(v.NETWR) > 50000   THEN 'SILVER'
-            ELSE 'STANDARD'
-        END                                         AS customer_tier
-    FROM laboratory_sap_dev.sap_course.kna1_silver k
+            WHEN SUM(v.NETWR) > 500000 THEN 'PLATINUM'
+            WHEN SUM(v.NETWR) > 100000 THEN 'GOLD'
+            WHEN SUM(v.NETWR) > 50000  THEN 'SILVER'
+            ELSE                            'STANDARD'
+        END                                          AS customer_tier
+    FROM laboratory_sap_dev.sap_course.kna1_silver  k
     LEFT JOIN laboratory_sap_dev.sap_course.vbak_silver v
-        ON k.KUNNR = v.KUNNR AND v._is_valid = TRUE
-    GROUP BY k.KUNNR, k.NAME1, k.LAND1, k.ORT01
+           ON LPAD(CAST(k.codigo_cliente AS STRING), 10, '0') = v.KUNNR
+          AND v.VBELN  IS NOT NULL
+          AND v.NETWR  > 0
+          AND v.ERDAT  IS NOT NULL
+    WHERE k.es_valido = TRUE
+    GROUP BY k.codigo_cliente, k.nombre_cliente, k.pais,
+             k.ciudad, k.sector_industria
     ORDER BY total_revenue DESC NULLS LAST
 """)
-print("GOLD: customer_360 creado")
+print("✅ GOLD: gold_customer_360 creado")
 
-# Distribución de clientes por tier
 spark.sql("""
-    SELECT customer_tier, COUNT(*) as num_customers, 
-           ROUND(SUM(total_revenue),2) as revenue
+    SELECT customer_tier,
+           COUNT(*)                    AS num_customers,
+           ROUND(SUM(total_revenue),2) AS revenue
     FROM laboratory_sap_dev.sap_course.gold_customer_360
     GROUP BY customer_tier
     ORDER BY revenue DESC
