@@ -32,6 +32,7 @@
 
 CATALOG = "laboratory_sap_dev"
 SCHEMA  = "sap_course"
+TARGET_TABLE = "laboratory_sap_dev.sap_course.vbak_bronze_autoloader"
 SAP_DATA_PATH = f"/Volumes/{CATALOG}/bronze/curso_databricks"
 spark.sql(f"USE {CATALOG}.{SCHEMA}")
 print(f"Contexto: {CATALOG}.{SCHEMA}")
